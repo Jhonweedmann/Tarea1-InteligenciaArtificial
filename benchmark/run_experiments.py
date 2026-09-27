@@ -13,7 +13,7 @@ from simulation import run_simulation
 
 MAP_NAMES = ["map1", "map2", "map3"]
 ALGORITHM_NAMES = ["bfs", "ucs", "astar", "greedy", "genetic"]
-NUM_ITERATIONS = 80
+NUM_ITERATIONS = 200
 RESULTS_DIR = os.path.join(BASE_DIR, "benchmark", "results")
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
@@ -64,9 +64,9 @@ def run_benchmark():
         for map_name in MAP_NAMES:
             for algo_name in ALGORITHM_NAMES:
                 algo_results = [r for r in all_results if r["map"] == map_name and r["algorithm"] == algo_name]
-                survived = [r for r in algo_results if r["survived"]]
-                turns = [r["turns"] for r in algo_results if r["survived"]]
-                survival_rate = len(survived) / len(algo_results) if algo_results else 0
+                survival_rates = [r["survived"] for r in algo_results]
+                turns = [r["turns"] for r in algo_results if r["survived"] > 0]
+                survival_rate = statistics.mean(survival_rates) if survival_rates else 0
                 if turns:
                     summary = {
                         "map": map_name,

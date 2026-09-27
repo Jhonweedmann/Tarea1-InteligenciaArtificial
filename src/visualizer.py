@@ -48,7 +48,8 @@ def render(env, agent, turn):
 def run_visual(map_name, algorithm_name, fire_seed=None, delay=0.3, max_turns=200):
     from maps import MAPS
     grid = MAPS[map_name]()
-    env = Environment(grid, fire_propagation_interval=3, congestion_k=0.1, fire_seed=fire_seed)
+    env = Environment(grid, fire_propagation_interval=3, congestion_k=0.1, fire_seed=fire_seed,
+                      num_agents=1)
 
     agent_starts = list(env.agent_positions.keys())
     if not agent_starts:

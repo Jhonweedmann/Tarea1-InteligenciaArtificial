@@ -1,2 +1,5 @@
-benchmark/results/*
-informe/*
+__pycache__/
+*.pyc
+*.aux
+*.log
+*.out

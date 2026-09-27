@@ -20,42 +20,47 @@ NUM_AGENTS_DEFAULT = 80
 
 def run_simulation(map_name, algorithm_name, num_agents=80,
                    fire_propagation_interval=3, congestion_k=0.1,
-                   fire_seed=None, max_turns=500):
+                   fire_seed=None, max_turns=500, cell_capacity=3):
     from maps import MAPS
     grid = MAPS[map_name]()
+    # num_agents=0: el entorno solo registra a los agentes reales creados abajo
     env = Environment(grid, fire_propagation_interval=fire_propagation_interval,
                       congestion_k=congestion_k, fire_seed=fire_seed,
-                      num_agents=num_agents)
+                      num_agents=0, cell_capacity=cell_capacity)
 
     exit_pos = env.exit_pos
     free_cells = env.get_free_cells()
     if not free_cells:
-        return {"survived": False, "turns": 0, "agents_escaped": 0}
+        return {"survived": 0.0, "turns": None, "agents_escaped": 0}
 
     rng = random.Random(fire_seed if fire_seed is not None else 42)
     agents = []
     for _ in range(num_agents):
         start_pos = rng.choice(free_cells)
-        agent = Agent(start_pos, env)
-        path = _find_path(algorithm_name, env, start_pos, exit_pos)
-        if path is not None:
-            agent.set_path(path)
-        agents.append(agent)
+        agents.append(Agent(start_pos, env))
+        env.add_agent(start_pos)
 
+    # Se planifica con todos los agentes ya ubicados, para que la congestion sea visible
+    for agent in agents:
+        agent.set_path(_find_path(algorithm_name, env, agent.current_pos, exit_pos))
+
+    # Tiempo de despeje: turno en que el ultimo sobreviviente alcanzo la salida
+    last_escape_turn = None
     turn = 0
     while turn < max_turns:
         for agent in agents:
             if agent.alive and not agent.escaped:
-                if agent.path:
-                    agent.move(env)
-                else:
-                    agent.wait(env)
+                agent.move(env)
+                if agent.escaped:
+                    last_escape_turn = turn + 1
 
-        if not any(a.alive for a in agents):
-            return {"survived": False, "turns": turn + 1, "agents_escaped": count_escaped(agents)}
-        if all(a.escaped or not a.alive for a in agents):
-            escaped_count = count_escaped(agents)
-            return {"survived": escaped_count > 0, "turns": turn + 1, "agents_escaped": escaped_count}
+        # Los evacuados abandonan la salida al final del turno; asi la capacidad
+        # de la salida limita cuantos agentes evacuan por turno
+        while env.get_occupation(*exit_pos) > 0:
+            env.remove_agent(exit_pos)
+
+        if all_done(agents):
+            break
 
         env.step()
 
@@ -65,11 +70,8 @@ def run_simulation(map_name, algorithm_name, num_agents=80,
                     agent.alive = False
                     env.remove_agent(agent.current_pos)
 
-        if not any(a.alive for a in agents):
-            return {"survived": False, "turns": turn + 1, "agents_escaped": count_escaped(agents)}
-        if all(a.escaped or not a.alive for a in agents):
-            escaped_count = count_escaped(agents)
-            return {"survived": escaped_count > 0, "turns": turn + 1, "agents_escaped": escaped_count}
+        if all_done(agents):
+            break
 
         if turn % fire_propagation_interval == fire_propagation_interval - 1:
             for agent in agents:
@@ -80,9 +82,12 @@ def run_simulation(map_name, algorithm_name, num_agents=80,
         turn += 1
 
     escaped_count = count_escaped(agents)
-    still_alive = sum(1 for a in agents if a.alive and not a.escaped)
-    return {"survived": escaped_count > 0 and still_alive == 0,
-            "turns": turn, "agents_escaped": escaped_count}
+    return {"survived": escaped_count / num_agents, "turns": last_escape_turn,
+            "agents_escaped": escaped_count}
+
+
+def all_done(agents):
+    return all(a.escaped or not a.alive for a in agents)
 
 
 def count_escaped(agents):

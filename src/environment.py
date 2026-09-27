@@ -11,19 +11,23 @@ class CellType:
 
 
 class Environment:
-    def __init__(self, grid, fire_propagation_interval=3, congestion_k=0.1, fire_seed=None, num_agents=80):
+    def __init__(self, grid, fire_propagation_interval=3, congestion_k=0.1, fire_seed=None, num_agents=0,
+                 cell_capacity=3):
         self.grid = [row[:] for row in grid]
         self.rows = len(grid)
         self.cols = len(grid[0]) if self.rows > 0 else 0
         self.fire_propagation_interval = fire_propagation_interval
         self.congestion_k = congestion_k
+        # Capacidad fisica de cada celda: maximo de agentes que pueden ocuparla a la vez.
+        # En la salida limita cuantos agentes evacuan por turno.
+        self.cell_capacity = cell_capacity
         self.fire_turn = 0
         self.agent_positions = {}
         self.exit_pos = None
         self.num_agents = num_agents
         self._parse_grid()
-        self._place_agents_randomly(num_agents)
         self._add_random_fire(fire_seed)
+        self._place_agents_randomly(num_agents, fire_seed)
 
     def _parse_grid(self):
         for r in range(self.rows):
@@ -51,37 +55,35 @@ class Environment:
                 if self._has_path():
                     break
 
-    def _place_agents_randomly(self, num_agents):
+    def _place_agents_randomly(self, num_agents, seed=None):
         free_cells = self.get_free_cells()
         if not free_cells:
             return
-        rng = random.Random(42)
+        rng = random.Random(seed if seed is not None else 42)
         for _ in range(num_agents):
-            pos = rng.choice(free_cells)
-            self.agent_positions[pos] = self.agent_positions.get(pos, 0) + 1
+            self.add_agent(rng.choice(free_cells))
 
     def _has_path(self):
+        # Verifica que la salida siga conectada con al menos una celda libre
         if self.exit_pos is None:
             return False
-        start_pos = None
-        for pos, count in self.agent_positions.items():
-            if count > 0:
-                start_pos = pos
-                break
-        if start_pos is None:
-            return False
-        visited = set()
-        visited.add(start_pos)
-        queue = deque([start_pos])
+        visited = {self.exit_pos}
+        queue = deque([self.exit_pos])
         while queue:
             current = queue.popleft()
-            if current == self.exit_pos:
-                return True
             for nr, nc in self.get_neighbors(current[0], current[1]):
                 if (nr, nc) not in visited:
+                    if self.grid[nr][nc] == CellType.FREE:
+                        return True
                     visited.add((nr, nc))
                     queue.append((nr, nc))
         return False
+
+    def add_agent(self, pos):
+        self.agent_positions[pos] = self.agent_positions.get(pos, 0) + 1
+
+    def has_capacity(self, r, c):
+        return self.get_occupation(r, c) < self.cell_capacity
 
     def move_agent(self, old_pos, new_pos):
         if old_pos in self.agent_positions:

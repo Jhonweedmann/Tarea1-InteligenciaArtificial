@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Analisis de resultados del benchmark de escape de torre.
-Genera estadisticas descriptivas y graficos comparativos.
-"""
-
 import os
 import sys
 import csv
@@ -36,7 +30,7 @@ def load_results():
                 turns = []
                 for row in reader:
                     s = row["survived"].strip()
-                    survived.append(1 if s == "True" or s == "1" else 0)
+                    survived.append(float(s) if s else 0.0)
                     t = row["turns"].strip()
                     turns.append(int(t) if t else 0)
                 all_data[map_name][algo] = {"survived": survived, "turns": turns}
@@ -53,8 +47,8 @@ def print_summary_table(data):
     for map_name in MAPS:
         for algo in ALGORITHMS:
             d = data[map_name][algo]
-            turns = [t for t, s in zip(d["turns"], d["survived"]) if s == 1]
-            rate = sum(d["survived"]) / len(d["survived"]) if d["survived"] else 0
+            turns = [t for t, s in zip(d["turns"], d["survived"]) if s > 0]
+            rate = np.mean(d["survived"]) if d["survived"] else 0
             if turns:
                 print(f"{map_name:<8} {algo:<12} {rate:>8.2f} {np.mean(turns):>8.1f} {np.std(turns):>8.1f} {min(turns):>8} {max(turns):>8}")
             else:
@@ -68,7 +62,7 @@ def plot_boxplots(data):
         turns_data = []
         labels = []
         for algo in ALGORITHMS:
-            turns = [t for t, s in zip(data[map_name][algo]["turns"], data[map_name][algo]["survived"]) if s == 1]
+            turns = [t for t, s in zip(data[map_name][algo]["turns"], data[map_name][algo]["survived"]) if s > 0]
             if turns:
                 turns_data.append(turns)
                 labels.append(algo)
@@ -90,7 +84,7 @@ def plot_survival_rates(data):
     for idx, map_name in enumerate(MAPS):
         rates = []
         for algo in ALGORITHMS:
-            rate = sum(data[map_name][algo]["survived"]) / len(data[map_name][algo]["survived"]) if data[map_name][algo]["survived"] else 0
+            rate = np.mean(data[map_name][algo]["survived"]) if data[map_name][algo]["survived"] else 0
             rates.append(rate)
         ax.bar(x + idx * width, rates, width, label=map_name)
     ax.set_xlabel("Algoritmo")
@@ -112,7 +106,7 @@ def plot_mean_turns(data):
     for idx, map_name in enumerate(MAPS):
         means = []
         for algo in ALGORITHMS:
-            turns = [t for t, s in zip(data[map_name][algo]["turns"], data[map_name][algo]["survived"]) if s == 1]
+            turns = [t for t, s in zip(data[map_name][algo]["turns"], data[map_name][algo]["survived"]) if s > 0]
             means.append(np.mean(turns) if turns else 0)
         ax.bar(x + idx * width, means, width, label=map_name)
     ax.set_xlabel("Algoritmo")
@@ -132,11 +126,11 @@ def plot_heatmap(data):
     for idx, map_name in enumerate(MAPS):
         matrix = np.zeros((3, 5))
         for algo_idx, algo in enumerate(ALGORITHMS):
-            turns = [t for t, s in zip(data[map_name][algo]["turns"], data[map_name][algo]["survived"]) if s == 1]
+            turns = [t for t, s in zip(data[map_name][algo]["turns"], data[map_name][algo]["survived"]) if s > 0]
             if turns:
                 matrix[0, algo_idx] = np.mean(turns)
                 matrix[1, algo_idx] = np.std(turns)
-                matrix[2, algo_idx] = sum(data[map_name][algo]["survived"]) / len(data[map_name][algo]["survived"])
+                matrix[2, algo_idx] = np.mean(data[map_name][algo]["survived"])
         im = axes[idx].imshow(matrix, aspect='auto', cmap='RdYlGn_r')
         axes[idx].set_title(map_name)
         axes[idx].set_xticks(range(5))

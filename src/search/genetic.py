@@ -2,8 +2,18 @@ import random
 from environment import Environment, CellType
 from .astar import manhattan, astar_search
 
+# Genes: acciones ortogonales o esperar
+ACTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1), (0, 0)]
+
 
 class GeneticAlgorithm:
+    """
+    Cada individuo es una secuencia de acciones (arriba, abajo, izquierda,
+    derecha, esperar). Al decodificarla desde la posicion inicial, una accion
+    que choca con un muro, fuego o el borde se convierte en esperar, por lo
+    que toda ruta resultante respeta el movimiento ortogonal de una casilla.
+    """
+
     def __init__(self, env, start, goal, pop_size=15, generations=20,
                  mutation_rate=0.2, tournament_size=3, max_path_length=200):
         self.env = env
@@ -15,53 +25,56 @@ class GeneticAlgorithm:
         self.tournament_size = tournament_size
         self.max_path_length = max_path_length
 
-    def _random_coord(self):
-        nr = random.randint(0, self.env.rows - 1)
-        nc = random.randint(0, self.env.cols - 1)
-        if self.env.is_wall(nr, nc) or self.env.is_fire(nr, nc):
-            return self.start
-        return (nr, nc)
+    def _random_action(self):
+        return random.choice(ACTIONS)
+
+    def _is_passable(self, r, c):
+        return (0 <= r < self.env.rows and 0 <= c < self.env.cols
+                and not self.env.is_wall(r, c) and not self.env.is_fire(r, c))
+
+    def _path_to_actions(self, path):
+        actions = []
+        pos = self.start
+        for nxt in path:
+            actions.append((nxt[0] - pos[0], nxt[1] - pos[1]))
+            pos = nxt
+        return actions
 
     def _generate_individual(self, smart=False):
         if smart and self.start != self.goal:
             astar_path = astar_search(self.env, self.start, self.goal)
-            if astar_path is not None and len(astar_path) > 0:
-                path = list(astar_path)
-                if len(path) < 5:
-                    length = random.randint(5, 20)
-                    for _ in range(length - len(path)):
-                        pos = path[-1] if path else self.start
-                        dr, dc = random.choice([(-1,0),(1,0),(0,-1),(0,1)])
-                        nr, nc = pos[0]+dr, pos[1]+dc
-                        if 0 <= nr < self.env.rows and 0 <= nc < self.env.cols and not self.env.is_wall(nr,nc) and not self.env.is_fire(nr,nc):
-                            path.append((nr, nc))
-                return path[:self.max_path_length]
+            if astar_path:
+                actions = self._path_to_actions(astar_path)
+                # Cola aleatoria para que el cruce tenga material con que trabajar
+                extra = random.randint(0, 5)
+                actions += [self._random_action() for _ in range(extra)]
+                return actions[:self.max_path_length]
 
         length = random.randint(20, self.max_path_length)
-        return [self._random_coord() for _ in range(length)]
+        return [self._random_action() for _ in range(length)]
 
-    def _simulate(self, path):
+    def _decode(self, actions):
+        """Convierte acciones en la ruta de coordenadas y la corta al llegar a la salida."""
+        path = []
         pos = self.start
-        total_cost = 0
-        steps = 0
-        reached = False
-        for coord in path:
-            nr, nc = coord
-            if not (0 <= nr < self.env.rows and 0 <= nc < self.env.cols):
+        for dr, dc in actions:
+            nr, nc = pos[0] + dr, pos[1] + dc
+            if not self._is_passable(nr, nc):
                 nr, nc = pos
-            if self.env.is_wall(nr, nc) or self.env.is_fire(nr, nc):
-                nr, nc = pos
-            cost = self.env.cost(nr, nc)
-            total_cost += cost
             pos = (nr, nc)
-            steps += 1
+            path.append(pos)
             if pos == self.goal:
-                reached = True
                 break
-        return pos, total_cost, steps, reached
+        return path
 
-    def _fitness(self, path):
-        pos, total_cost, steps, reached = self._simulate(path)
+    def _simulate(self, actions):
+        path = self._decode(actions)
+        total_cost = sum(self.env.cost(r, c) for r, c in path)
+        pos = path[-1] if path else self.start
+        return pos, total_cost, len(path), pos == self.goal
+
+    def _fitness(self, actions):
+        pos, total_cost, steps, reached = self._simulate(actions)
         if reached:
             return -steps - 0.05 * total_cost + 200
         dist = manhattan(pos, self.goal)
@@ -77,30 +90,19 @@ class GeneticAlgorithm:
         if min_len < 4:
             return parent1[:]
         cx_point = random.randint(2, min_len - 2)
-        child = parent1[:cx_point] + parent2[cx_point:]
-        return child
+        return parent1[:cx_point] + parent2[cx_point:]
 
-    def _mutate(self, path):
-        mutated = path[:]
+    def _mutate(self, actions):
+        mutated = actions[:]
         for i in range(len(mutated)):
             if random.random() < self.mutation_rate:
-                mutated[i] = self._random_coord()
+                mutated[i] = self._random_action()
         return mutated
 
-    def _repair(self, path):
-        repaired = []
-        pos = self.start
-        for coord in path:
-            nr, nc = coord
-            if not (0 <= nr < self.env.rows and 0 <= nc < self.env.cols) or self.env.is_wall(nr, nc) or self.env.is_fire(nr, nc):
-                nr, nc = pos
-            repaired.append((nr, nc))
-            pos = (nr, nc)
-            if pos == self.goal:
-                break
-        return repaired
-
     def run(self):
+        if self.start == self.goal:
+            return [], 0
+
         population = []
         for _ in range(self.pop_size):
             smart = random.random() < 0.6
@@ -115,8 +117,7 @@ class GeneticAlgorithm:
             max_fit = max(fitnesses)
             if max_fit > best_fitness:
                 best_fitness = max_fit
-                best_idx = fitnesses.index(max_fit)
-                best_individual = population[best_idx][:]
+                best_individual = population[fitnesses.index(max_fit)][:]
 
             new_population = []
             elite_count = max(2, self.pop_size // 5)
@@ -129,9 +130,15 @@ class GeneticAlgorithm:
                 parent2 = self._selection(population, fitnesses)
                 child = self._crossover(parent1, parent2)
                 child = self._mutate(child)
-                child = self._repair(child)
                 new_population.append(child)
 
             population = new_population
 
-        return best_individual, best_fitness
+        # Ultima generacion tambien se evalua
+        fitnesses = [self._fitness(ind) for ind in population]
+        max_fit = max(fitnesses)
+        if max_fit > best_fitness:
+            best_fitness = max_fit
+            best_individual = population[fitnesses.index(max_fit)][:]
+
+        return self._decode(best_individual), best_fitness

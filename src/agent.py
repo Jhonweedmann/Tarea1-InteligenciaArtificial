@@ -11,25 +11,34 @@ class Agent:
         self.escaped = False
 
     def set_path(self, path):
-        self.path = path
-        self.turns_taken = 0
+        self.path = list(path) if path else []
 
     def move(self, env):
         if self.escaped or not self.alive:
             return
-        if self.path:
-            next_pos = self.path.pop(0)
-            nr, nc = next_pos
-            if not (0 <= nr < env.rows and 0 <= nc < env.cols) or env.is_wall(nr, nc) or env.is_fire(nr, nc):
-                self.alive = False
-                return
-            env.move_agent(self.current_pos, next_pos)
-            self.current_pos = next_pos
-            self.turns_taken += 1
-            if self.current_pos == env.exit_pos:
-                self.escaped = True
-        else:
-            self.turns_taken += 1
+        self.turns_taken += 1
+        if not self.path:
+            return
+        next_pos = self.path[0]
+        nr, nc = next_pos
+        # Accion esperar: la ruta repite la posicion actual
+        if next_pos == self.current_pos:
+            self.path.pop(0)
+            return
+        # Solo desplazamientos ortogonales de una casilla
+        dist = abs(nr - self.current_pos[0]) + abs(nc - self.current_pos[1])
+        if dist != 1 or env.is_wall(nr, nc) or env.is_fire(nr, nc):
+            # Ruta invalida: el agente espera y replanifica en la proxima oportunidad
+            self.path = []
+            return
+        # Cuello de botella: si la celda esta llena, el agente espera su turno
+        if not env.has_capacity(nr, nc):
+            return
+        self.path.pop(0)
+        env.move_agent(self.current_pos, next_pos)
+        self.current_pos = next_pos
+        if self.current_pos == env.exit_pos:
+            self.escaped = True
 
     def wait(self, env):
         if self.escaped or not self.alive:
