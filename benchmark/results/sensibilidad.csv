@@ -1,0 +1,61 @@
+experiment,variant,map,algorithm,survival_rate,ci95_half
+A_fire_interval,k=3,map1,bfs,0.4039,0.0405
+A_fire_interval,k=3,map1,ucs,0.3872,0.0393
+A_fire_interval,k=3,map1,astar,0.3872,0.0393
+A_fire_interval,k=3,map1,greedy,0.3714,0.0375
+A_fire_interval,k=3,map2,bfs,0.4876,0.0433
+A_fire_interval,k=3,map2,ucs,0.4793,0.0431
+A_fire_interval,k=3,map2,astar,0.4801,0.0434
+A_fire_interval,k=3,map2,greedy,0.4416,0.0408
+A_fire_interval,k=3,map3,bfs,0.4286,0.028
+A_fire_interval,k=3,map3,ucs,0.4375,0.0289
+A_fire_interval,k=3,map3,astar,0.4375,0.0289
+A_fire_interval,k=3,map3,greedy,0.4279,0.0273
+A_fire_interval,k=5,map1,bfs,0.5777,0.0499
+A_fire_interval,k=5,map1,ucs,0.5567,0.0485
+A_fire_interval,k=5,map1,astar,0.5567,0.0485
+A_fire_interval,k=5,map1,greedy,0.5325,0.0453
+A_fire_interval,k=5,map2,bfs,0.5995,0.0392
+A_fire_interval,k=5,map2,ucs,0.5835,0.0379
+A_fire_interval,k=5,map2,astar,0.5841,0.0379
+A_fire_interval,k=5,map2,greedy,0.5634,0.0385
+A_fire_interval,k=5,map3,bfs,0.6432,0.0338
+A_fire_interval,k=5,map3,ucs,0.6502,0.0349
+A_fire_interval,k=5,map3,astar,0.65,0.0348
+A_fire_interval,k=5,map3,greedy,0.6342,0.035
+A_fire_interval,k=7,map1,bfs,0.6799,0.0496
+A_fire_interval,k=7,map1,ucs,0.6623,0.0493
+A_fire_interval,k=7,map1,astar,0.6623,0.0493
+A_fire_interval,k=7,map1,greedy,0.643,0.0469
+A_fire_interval,k=7,map2,bfs,0.6627,0.0353
+A_fire_interval,k=7,map2,ucs,0.6446,0.034
+A_fire_interval,k=7,map2,astar,0.6448,0.034
+A_fire_interval,k=7,map2,greedy,0.6299,0.0339
+A_fire_interval,k=7,map3,bfs,0.7776,0.0298
+A_fire_interval,k=7,map3,ucs,0.7819,0.0305
+A_fire_interval,k=7,map3,astar,0.7816,0.0304
+A_fire_interval,k=7,map3,greedy,0.768,0.0324
+B_map_size,25x25 con fuego aleatorio,map1,bfs,0.2392,0.0435
+B_map_size,25x25 con fuego aleatorio,map1,ucs,0.2357,0.0431
+B_map_size,25x25 con fuego aleatorio,map1,astar,0.2357,0.0431
+B_map_size,25x25 con fuego aleatorio,map1,greedy,0.2296,0.0419
+B_map_size,25x25 con fuego aleatorio,map2,bfs,0.1161,0.0175
+B_map_size,25x25 con fuego aleatorio,map2,ucs,0.1115,0.018
+B_map_size,25x25 con fuego aleatorio,map2,astar,0.1116,0.018
+B_map_size,25x25 con fuego aleatorio,map2,greedy,0.1036,0.0176
+B_map_size,25x25 con fuego aleatorio,map3,bfs,0.2439,0.0289
+B_map_size,25x25 con fuego aleatorio,map3,ucs,0.2561,0.0315
+B_map_size,25x25 con fuego aleatorio,map3,astar,0.2564,0.0316
+B_map_size,25x25 con fuego aleatorio,map3,greedy,0.2411,0.0303
+B_map_size,25x25 sin fuego aleatorio,map1,bfs,1.0,0.0
+B_map_size,25x25 sin fuego aleatorio,map1,ucs,1.0,0.0
+B_map_size,25x25 sin fuego aleatorio,map1,astar,1.0,0.0
+B_map_size,25x25 sin fuego aleatorio,map1,greedy,1.0,0.0
+B_map_size,25x25 sin fuego aleatorio,map2,bfs,0.9981,0.0009
+B_map_size,25x25 sin fuego aleatorio,map2,ucs,0.9986,0.0008
+B_map_size,25x25 sin fuego aleatorio,map2,astar,0.9995,0.0005
+B_map_size,25x25 sin fuego aleatorio,map2,greedy,0.9666,0.0064
+B_map_size,25x25 sin fuego aleatorio,map3,bfs,1.0,0.0
+B_map_size,25x25 sin fuego aleatorio,map3,ucs,1.0,0.0
+B_map_size,25x25 sin fuego aleatorio,map3,astar,1.0,0.0
+B_map_size,25x25 sin fuego aleatorio,map3,greedy,1.0,0.0

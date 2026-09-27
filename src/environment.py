@@ -222,51 +222,58 @@ def _convert_grid(raw_grid):
 
 
 def make_map1():
+    # Alta densidad / Cuello de botella: reticula de pasillos de ancho 1 que
+    # converge en un embudo; una sola celda da acceso a la salida.
     raw_grid = [
         ["free", "free", "free", "free", "free", "free", "free"],
-        ["free", "wall", "wall", "wall", "wall", "wall", "free"],
-        ["free", "wall", "free", "free", "free", "wall", "free"],
         ["free", "wall", "free", "wall", "free", "wall", "free"],
-        ["free", "free", "free", "wall", "exit", "free", "free"],
-        ["free", "wall", "wall", "wall", "wall", "wall", "free"],
         ["free", "free", "free", "free", "free", "free", "free"],
+        ["free", "wall", "free", "wall", "free", "wall", "free"],
+        ["free", "free", "free", "free", "free", "free", "free"],
+        ["wall", "wall", "free", "free", "free", "wall", "wall"],
+        ["wall", "wall", "wall", "exit", "wall", "wall", "wall"],
     ]
     grid = _convert_grid(raw_grid)
-    grid[6][6] = CellType.FIRE
-    grid[0][5] = CellType.FIRE
+    grid[0][0] = CellType.FIRE
+    grid[0][6] = CellType.FIRE
     return grid
 
 
 def make_map2():
+    # Densidad media / Laberinto corporativo: 4 salas separadas por muros,
+    # conectadas por puertas, con tabiques que forman rincones ciegos.
+    # A la sala de la salida se entra por 2 puertas.
     raw_grid = [
+        ["free", "free", "free", "wall", "free", "free", "free", "free"],
+        ["free", "wall", "free", "free", "free", "wall", "free", "free"],
+        ["free", "wall", "free", "wall", "free", "wall", "free", "free"],
+        ["free", "wall", "wall", "wall", "wall", "wall", "free", "wall"],
+        ["free", "free", "free", "wall", "free", "free", "free", "free"],
+        ["free", "wall", "free", "wall", "free", "wall", "free", "free"],
         ["free", "free", "free", "free", "free", "free", "free", "free"],
-        ["free", "wall", "wall", "wall", "free", "wall", "wall", "free"],
-        ["free", "wall", "free", "free", "free", "free", "wall", "free"],
-        ["free", "free", "free", "wall", "wall", "free", "wall", "free"],
-        ["wall", "wall", "free", "wall", "exit", "free", "free", "free"],
-        ["free", "free", "free", "wall", "free", "wall", "wall", "free"],
-        ["free", "wall", "wall", "wall", "free", "free", "free", "free"],
-        ["free", "free", "free", "free", "free", "wall", "free", "free"],
+        ["free", "free", "free", "wall", "free", "free", "exit", "free"],
     ]
     grid = _convert_grid(raw_grid)
-    grid[7][7] = CellType.FIRE
-    grid[0][4] = CellType.FIRE
+    grid[0][0] = CellType.FIRE
+    grid[0][7] = CellType.FIRE
     return grid
 
 
 def make_map3():
+    # Baja densidad / Dispersion abierta: planta abierta con pilares sueltos
+    # y la salida al centro, accesible desde sus 4 lados.
     raw_grid = [
         ["free", "free", "free", "free", "free", "free", "free", "free", "free"],
-        ["free", "free", "wall", "free", "free", "free", "free", "free", "free"],
+        ["free", "wall", "free", "free", "free", "free", "free", "wall", "free"],
         ["free", "free", "free", "free", "wall", "free", "free", "free", "free"],
-        ["wall", "wall", "free", "wall", "wall", "free", "wall", "wall", "wall"],
-        ["free", "free", "free", "free", "exit", "free", "free", "free", "free"],
-        ["wall", "wall", "free", "wall", "wall", "free", "wall", "wall", "wall"],
+        ["free", "free", "free", "free", "free", "free", "free", "free", "free"],
+        ["free", "free", "wall", "free", "exit", "free", "wall", "free", "free"],
+        ["free", "free", "free", "free", "free", "free", "free", "free", "free"],
         ["free", "free", "free", "free", "wall", "free", "free", "free", "free"],
-        ["free", "free", "wall", "free", "free", "free", "free", "free", "free"],
+        ["free", "wall", "free", "free", "free", "free", "free", "wall", "free"],
         ["free", "free", "free", "free", "free", "free", "free", "free", "free"],
     ]
     grid = _convert_grid(raw_grid)
-    grid[0][4] = CellType.FIRE
-    grid[4][0] = CellType.FIRE
+    grid[0][0] = CellType.FIRE
+    grid[8][8] = CellType.FIRE
     return grid

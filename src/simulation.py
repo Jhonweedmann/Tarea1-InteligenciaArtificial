@@ -36,7 +36,9 @@ def run_simulation(map_name, algorithm_name, num_agents=80,
     rng = random.Random(fire_seed if fire_seed is not None else 42)
     agents = []
     for _ in range(num_agents):
-        start_pos = rng.choice(free_cells)
+        # Respeta la capacidad de cada celda al ubicar a los agentes
+        candidates = [cell for cell in free_cells if env.has_capacity(*cell)] or free_cells
+        start_pos = rng.choice(candidates)
         agents.append(Agent(start_pos, env))
         env.add_agent(start_pos)
 
