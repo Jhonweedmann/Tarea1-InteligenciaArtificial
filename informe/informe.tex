@@ -24,6 +24,10 @@
 
 \maketitle
 
+\begin{center}
+\small Repositorio: \url{https://github.com/Jhonweedmann/Tarea1-InteligenciaArtificial}
+\end{center}
+
 \begin{abstract}
 Se simula la evacuación de un piso de una torre en llamas y se comparan cinco algoritmos de navegación: dos de búsqueda no informada (BFS, UCS), dos de búsqueda informada (A*, Greedy Best-First) y un algoritmo genético. El entorno es dinámico: el fuego avanza de forma irreversible, las celdas tienen capacidad limitada y los agentes replanifican sus rutas. Sobre 3000 simulaciones (3 mapas, 5 algoritmos, 200 iteraciones, 80 agentes), la supervivencia queda limitada principalmente por el cuello de botella de la salida y por el tiempo que tarda el fuego en rodearla. Ninguna diferencia entre algoritmos es estadísticamente significativa tras corregir por comparaciones múltiples. Un análisis de sensibilidad (velocidad del fuego y mapas de $25\times25$) confirma que el resultado no se debe al tamaño de los mapas, y muestra un efecto pequeño pero consistente: Greedy es el algoritmo con menor supervivencia.
 \end{abstract}

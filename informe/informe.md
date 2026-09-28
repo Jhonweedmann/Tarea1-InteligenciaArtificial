@@ -1,6 +1,8 @@
 # Informe: Escape de la Torre
 Septiembre 2026
 
+**Repositorio:** [https://github.com/Jhonweedmann/Tarea1-InteligenciaArtificial](https://github.com/Jhonweedmann/Tarea1-InteligenciaArtificial)
+
 ## 1. Introducción
 
 Este informe presenta la simulación de evacuación de un piso de una torre en llamas y compara cinco algoritmos de navegación: dos de búsqueda no informada (BFS, UCS), dos de búsqueda informada (A*, Greedy Best-First) y un algoritmo genético. El entorno es dinámico: el fuego avanza de forma irreversible, los pasillos tienen capacidad limitada y los agentes deben replanificar sus rutas. El desempeño se mide mediante un benchmark de 200 iteraciones por combinación de mapa y algoritmo.
